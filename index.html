@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Desafio do Conhecimento</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background:
+                radial-gradient(circle at top, #243b80 0%, #10152e 45%, #050713 100%);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .game {
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .container {
+            width: min(900px, 100%);
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 42px;
+            font-weight: 900;
+            color: #ffd43b;
+            text-shadow: 0 0 20px rgba(255, 212, 59, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #bfc7e8;
+            margin-bottom: 35px;
+            font-size: 18px;
+        }
+
+        .start-screen {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            padding: 50px 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .start-screen h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .start-screen p {
+            color: #cbd2ef;
+            margin-bottom: 30px;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 12px;
+            padding: 16px 25px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .start-btn,
+        .restart-btn {
+            background: linear-gradient(135deg, #ffd43b, #ff9f1c);
+            color: #171717;
+            min-width: 220px;
+        }
+
+        .quiz {
+            display: none;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .score,
+        .timer,
+        .question-number {
+            background: rgba(255, 255, 255, 0.09);
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .timer {
+            color: #55efc4;
+        }
+
+        .timer.warning {
+            color: #ff7675;
+            animation: pulse 0.8s infinite;
+        }
+
+        @keyframes pulse {
+            50% {
+                transform: scale(1.08);
+            }
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.12);
+            border-radius: 20px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00cec9, #6c5ce7);
+            transition: width 0.3s;
+        }
+
+        .question-box {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 25px;
+            padding: 35px;
+            border: 1px solid rgba(255,255,255,0.13);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .question {
+            font-size: 29px;
+            line-height: 1.35;
+            margin-bottom: 30px;
+        }
+
+        .answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .answer {
+            width: 100%;
+            background: #20294f;
+            color: white;
+            border: 2px solid #34406f;
+            text-align: left;
+            min-height: 70px;
+        }
+
+        .answer:hover {
+            background: #2c3970;
+            border-color: #6c7bd9;
+        }
+
+        .answer.correct {
+            background: #087f5b;
+            border-color: #55efc4;
+        }
+
+        .answer.wrong {
+            background: #a93226;
+            border-color: #ff7675;
+        }
+
+        .answer:disabled {
+            cursor: default;
+        }
+
+        .feedback {
+            min-height: 30px;
+            margin-top: 20px;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .next-btn {
+            display: none;
+            margin-top: 20px;
+            background: #6c5ce7;
+            color: white;
+        }
+
+        .result {
+            display: none;
+            background: rgba(255,255,255,0.08);
+            border-radius: 25px;
+            padding: 50px 30px;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .result h2 {
+            font-size: 40px;
+            color: #ffd43b;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 60px;
+            font-weight: 900;
+            color: #55efc4;
+            margin: 20px;
+        }
+
+        .message {
+            font-size: 21px;
+            color: #d9def7;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 650px) {
+            .logo {
+                font-size: 30px;
+            }
+
+            .top {
+                flex-wrap: wrap;
+            }
+
+            .answers {
+                grid-template-columns: 1fr;
+            }
+
+            .question {
+                font-size: 23px;
+            }
+
+            .question-box {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="container">
+
+        <div class="logo">
+            🧠 DESAFIO DO CONHECIMENTO
+        </div>
+
+        <div class="subtitle">
+            Teste seus conhecimentos!
+        </div>
+
+        <!-- TELA INICIAL -->
+        <div class="start-screen" id="startScreen">
+
+            <h2>Você está preparado?</h2>
+
+            <p>
+                Responda às perguntas antes que o tempo acabe.
+                Quanto mais rápido e correto, maior será sua pontuação!
+            </p>
+
+            <button class="start-btn" onclick="startGame()">
+                🚀 COMEÇAR
+            </button>
+
+        </div>
+
+
+        <!-- QUIZ -->
+        <div class="quiz" id="quiz">
+
+            <div class="top">
+
+                <div class="question-number" id="questionNumber">
+                    Pergunta 1/10
+                </div>
+
+                <div class="score" id="score">
+                    ⭐ 0 pontos
+                </div>
+
+                <div class="timer" id="timer">
+                    ⏱️ 15
+                </div>
+
+            </div>
+
+            <div class="progress-container">
+                <div class="progress" id="progress"></div>
+            </div>
+
+            <div class="question-box">
+
+                <div class="question" id="question">
+                    Pergunta
+                </div>
+
+                <div class="answers" id="answers">
+                </div>
+
+                <div class="feedback" id="feedback"></div>
+
+                <button class="next-btn" id="nextBtn" onclick="nextQuestion()">
+                    Próxima pergunta ➜
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- RESULTADO -->
+        <div class="result" id="result">
+
+            <h2>🏆 FIM DE JOGO!</h2>
+
+            <p>Você fez:</p>
+
+            <div class="final-score" id="finalScore">
+                0
+            </div>
+
+            <div class="message" id="message">
+                Muito bom!
+            </div>
+
+            <button class="restart-btn" onclick="restartGame()">
+                🔄 JOGAR NOVAMENTE
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const questions = [
+
+    {
+        question: "Qual é o maior planeta do Sistema Solar?",
+        answers: [
+            "Terra",
+            "Marte",
+            "Júpiter",
+            "Saturno"
+        ],
+        correct: 2
+    },
+
+    {
+        question: "Qual linguagem é conhecida como uma linguagem de programação?",
+        answers: [
+            "Python",
+            "HTML",
+            "CSS",
+            "Todas as anteriores"
+        ],
+        correct: 0
+    },
+
+    {
+        question: "Quantos continentes existem tradicionalmente?",
+        answers: [
+            "3",
+            "5",
+            "6",
+            "7"
+        ],
+        correct: 3
+    },
+
+    {
+        question: "Qual é a capital do Brasil?",
+        answers: [
+            "São Paulo",
+            "Rio de Janeiro",
+            "Brasília",
+            "Salvador"
+        ],
+        correct: 2
+    },
+
+    {
+        question: "Quanto é 9 × 8?",
+        answers: [
+            "64",
+            "72",
+            "81",
+            "96"
+        ],
+        correct: 1
+    },
+
+    {
+        question: "Qual destes é um navegador de internet?",
+        answers: [
+            "Google Chrome",
+            "Python",
+            "Windows",
+            "Photoshop"
+        ],
+        correct: 0
+    },
+
+    {
+        question: "Qual órgão é responsável por bombear o sangue pelo corpo?",
+        answers: [
+            "Pulmão",
+            "Cérebro",
+            "Coração",
+            "Estômago"
+        ],
+        correct: 2
+    },
+
+    {
+        question: "Qual planeta é conhecido como Planeta Vermelho?",
+        answers: [
+            "Vênus",
+            "Marte",
+            "Mercúrio",
+            "Netuno"
+        ],
+        correct: 1
+    },
+
+    {
+        question: "Qual destes é um sistema operacional?",
+        answers: [
+            "Windows",
+            "Chrome",
+            "YouTube",
+            "Python"
+        ],
+        correct: 0
+    },
+
+    {
+        question: "Qual é o resultado de 100 ÷ 4?",
+        answers: [
+            "20",
+            "25",
+            "30",
+            "40"
+        ],
+        correct: 1
+    }
+
+];
+
+
+let currentQuestion = 0;
+let score = 0;
+let timeLeft = 15;
+let timerInterval;
+let answered = false;
+
+
+function startGame() {
+
+    currentQuestion = 0;
+    score = 0;
+
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("result").style.display = "none";
+    document.getElementById("quiz").style.display = "block";
+
+    showQuestion();
+}
+
+
+function showQuestion() {
+
+    clearInterval(timerInterval);
+
+    answered = false;
+    timeLeft = 15;
+
+    const question = questions[currentQuestion];
+
+    document.getElementById("questionNumber").textContent =
+        `Pergunta ${currentQuestion + 1}/${questions.length}`;
+
+    document.getElementById("score").textContent =
+        `⭐ ${score} pontos`;
+
+    document.getElementById("timer").textContent =
+        `⏱️ ${timeLeft}`;
+
+    document.getElementById("timer").classList.remove("warning");
+
+    document.getElementById("question").textContent =
+        question.question;
+
+    document.getElementById("feedback").textContent = "";
+
+    document.getElementById("nextBtn").style.display = "none";
+
+    const progress =
+        ((currentQuestion) / questions.length) * 100;
+
+    document.getElementById("progress").style.width =
+        `${progress}%`;
+
+    const answersContainer =
+        document.getElementById("answers");
+
+    answersContainer.innerHTML = "";
+
+    question.answers.forEach((answer, index) => {
+
+        const button = document.createElement("button");
+
+        button.className = "answer";
+
+        button.textContent =
+            `${String.fromCharCode(65 + index)}) ${answer}`;
+
+        button.onclick = () =>
+            selectAnswer(index, button);
+
+        answersContainer.appendChild(button);
+
+    });
+
+    startTimer();
+}
+
+
+function startTimer() {
+
+    timerInterval = setInterval(() => {
+
+        timeLeft--;
+
+        const timer =
+            document.getElementById("timer");
+
+        timer.textContent =
+            `⏱️ ${timeLeft}`;
+
+        if (timeLeft <= 5) {
+            timer.classList.add("warning");
+        }
+
+        if (timeLeft <= 0) {
+
+            clearInterval(timerInterval);
+
+            timeUp();
+        }
+
+    }, 1000);
+
+}
+
+
+function selectAnswer(index, button) {
+
+    if (answered) return;
+
+    answered = true;
+
+    clearInterval(timerInterval);
+
+    const question = questions[currentQuestion];
+
+    const buttons =
+        document.querySelectorAll(".answer");
+
+    buttons.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    if (index === question.correct) {
+
+        button.classList.add("correct");
+
+        // Quanto mais rápido, mais pontos.
+        const points = 100 + (timeLeft * 10);
+
+        score += points;
+
+        document.getElementById("feedback").textContent =
+            `🎉 CORRETO! +${points} pontos`;
+
+    } else {
+
+        button.classList.add("wrong");
+
+        buttons[question.correct].classList.add("correct");
+
+        document.getElementById("feedback").textContent =
+            "❌ Resposta errada!";
+
+    }
+
+    document.getElementById("score").textContent =
+        `⭐ ${score} pontos`;
+
+    document.getElementById("nextBtn").style.display =
+        "inline-block";
+}
+
+
+function timeUp() {
+
+    if (answered) return;
+
+    answered = true;
+
+    const question = questions[currentQuestion];
+
+    const buttons =
+        document.querySelectorAll(".answer");
+
+    buttons.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    buttons[question.correct].classList.add("correct");
+
+    document.getElementById("feedback").textContent =
+        "⏰ TEMPO ESGOTADO!";
+
+    document.getElementById("nextBtn").style.display =
+        "inline-block";
+}
+
+
+function nextQuestion() {
+
+    currentQuestion++;
+
+    if (currentQuestion >= questions.length) {
+
+        finishGame();
+
+    } else {
+
+        showQuestion();
+
+    }
+}
+
+
+function finishGame() {
+
+    clearInterval(timerInterval);
+
+    document.getElementById("quiz").style.display =
+        "none";
+
+    document.getElementById("result").style.display =
+        "block";
+
+    document.getElementById("finalScore").textContent =
+        score + " pontos";
+
+    let message;
+
+    if (score >= 1100) {
+
+        message =
+            "🔥 INCRÍVEL! Você realmente domina o assunto!";
+
+    } else if (score >= 800) {
+
+        message =
+            "👏 Muito bom! Excelente desempenho!";
+
+    } else if (score >= 500) {
+
+        message =
+            "👍 Bom trabalho! Continue estudando!";
+
+    } else {
+
+        message =
+            "💪 Não desista! Tente novamente e melhore sua pontuação!";
+
+    }
+
+    document.getElementById("message").textContent =
+        message;
+}
+
+
+function restartGame() {
+
+    document.getElementById("result").style.display =
+        "none";
+
+    startGame();
+}
+
+</script>
+
+</body>
+</html>
